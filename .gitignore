@@ -1,3 +1,4 @@
+*.test
 qonto/build
 qonto/config.yaml
 qonto/qonto
