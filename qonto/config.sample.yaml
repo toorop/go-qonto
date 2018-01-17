@@ -1,0 +1,12 @@
+# Qonto credentials
+login: your qonto login here
+secret: your qonto secret here
+
+# If you want to received email from cli (for watch command)
+smtp:
+  host: smtp.example.com
+  port: 25
+  mailfrom: john.locke@lost.com
+  # if smtpauth is enabled or required
+  user: johndoe
+  password: password
