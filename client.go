@@ -25,7 +25,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"time"
@@ -104,10 +103,11 @@ func (c *Client) GetTransactions(options GetTransactionOptions) (transactions []
 		return
 	}
 
-	response, err := c.doAndReturnBody(req)
+	resp, err := c.doAndReturnBody(req)
 	if err != nil {
 		return transactions, err
 	}
-	log.Println(string(response))
-	return
+	response := new(getTransactionResponse)
+	err = json.Unmarshal(resp, response)
+	return response.Transactions, err
 }

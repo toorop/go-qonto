@@ -117,3 +117,16 @@ func (o *GetTransactionOptions) isValid() (bool, error) {
 	return true, nil
 
 }
+
+// response to GET /transactions
+type getTransactionResponse struct {
+	Transactions []Transaction `json:"transactions"`
+	Meta         struct {
+		CurrentPage uint16 `json:"current_page"`
+		NextPage    uint16 `json:"next_page"`
+		PrevPage    uint16 `json:"prev_page"`
+		TotalPage   uint16 `json:"total_page"`
+		TotalCount  uint32 `json:"total_count"`
+		PerPage     uint16 `json:"per_page"`
+	} `json:"meta"`
+}

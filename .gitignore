@@ -3,3 +3,4 @@ qonto/build
 qonto/config.yaml
 qonto/qonto
 qonto/dist/
+qonto/deploy
