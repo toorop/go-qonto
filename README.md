@@ -4,9 +4,6 @@ Go API client and CLI for [Qonto](https://qonto.eu/) banking service.
 ## DISCLAIMER
 This package and the CLI are not provided nor supported by Qonto
 
-## DISCLAMER 2
-Work in progress, don't use it for now.
-
 ## go-qonto package quickstart
 
 ```go get github.com/toorop/go-qonto```
