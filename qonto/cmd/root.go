@@ -33,7 +33,7 @@ var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Version: "0.0.1",
+	Version: "0.0.1-alpha",
 	Use:     "qonto",
 	Short:   "qonto is a CLI tool to interact with Qonto banking services (https://qonto.eu/)",
 	Long: `
