@@ -25,12 +25,14 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
 
 const (
-	organizationRespJSON        = `{"organization":{"slug":"slug","bank_accounts":[{"slug":"bank-account-1","iban":"IBAN","bic":"BIC","currency":"EUR","balance":0.0,"balance_cents":0,"authorized_balance":0.0,"authorized_balance_cents":0}]}}`
+	getOrganizationResponse     = `{"organization":{"slug":"slug","bank_accounts":[{"slug":"bank-account-1","iban":"IBAN","bic":"BIC","currency":"EUR","balance":0.0,"balance_cents":0,"authorized_balance":0.0,"authorized_balance_cents":0}]}}`
+	getTransactionsResponse     = `{"transactions":[{"transaction_id":"bank-account-1-transaction-1","amount":100000000.0,"amount_cents":10000000000,"local_amount":100000000.0,"local_amount_cents":10000000000,"side":"credit","operation_type":"income","currency":"EUR","local_currency":"EUR","label":"Present from Elon Musk","settled_at":"2018-01-18T06:45:57.000Z","emitted_at":"2018-01-18T07:45:58.000Z","status":"completed","note":null}],"meta":{"current_page":1,"next_page":null,"prev_page":null,"total_pages":1,"total_count":1,"per_page":100}}`
 	testDoAndReturnBodyResponse = "yop"
 )
 
@@ -78,9 +80,9 @@ func TestDoAndReturnBody(t *testing.T) {
 	assert.Equal(t, testDoAndReturnBodyResponse+"\n", string(body))
 }
 
-func TestOrganization(t *testing.T) {
+func TestGETOrganization(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, organizationRespJSON)
+		fmt.Fprintln(w, getOrganizationResponse)
 	}))
 	defer ts.Close()
 	Q := New("login", "secret")
@@ -96,4 +98,39 @@ func TestOrganization(t *testing.T) {
 	assert.Equal(t, 0, orga.BankAccounts[0].BalanceCents)
 	assert.Equal(t, 0.0, orga.BankAccounts[0].AuthorizedBalance)
 	assert.Equal(t, 0, orga.BankAccounts[0].AuthorizedBalanceCents)
+
+}
+
+func TestGetTransaction(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, getTransactionsResponse)
+	}))
+	defer ts.Close()
+	Q := New("login", "secret")
+	Q.endpoint = ts.URL
+	options := GetTransactionOptions{
+		Slug: "slug",
+		Iban: "iban",
+	}
+	transactions, err := Q.GetTransactions(options)
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(transactions))
+	tx := transactions[0]
+	assert.Equal(t, "bank-account-1-transaction-1", tx.ID)
+	assert.Equal(t, 100000000.0, tx.Amount)
+	assert.Equal(t, uint64(10000000000), tx.AmountCents)
+	assert.Equal(t, 100000000.0, tx.LocalAmount)
+	assert.Equal(t, uint64(10000000000), tx.LocalAmountCents)
+	assert.Equal(t, "credit", tx.Side)
+	assert.Equal(t, "income", tx.OperationType)
+	assert.Equal(t, "EUR", tx.Currency)
+	assert.Equal(t, "EUR", tx.LocalCurrency)
+	assert.Equal(t, "Present from Elon Musk", tx.Label)
+	assert.Equal(t, "Present from Elon Musk", tx.Label)
+	expectedT, _ := time.Parse(ISO8601, "2018-01-18T06:45:57.000Z")
+	assert.Equal(t, expectedT, tx.SettleAt.Time)
+	expectedT, _ = time.Parse(ISO8601, "2018-01-18T07:45:58.000Z")
+	assert.Equal(t, expectedT, tx.EmittedAt.Time)
+	assert.Equal(t, "completed", tx.Status)
+	assert.Equal(t, "", tx.Note)
 }

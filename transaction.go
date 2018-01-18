@@ -21,7 +21,6 @@
 package qonto
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -30,7 +29,7 @@ import (
 
 const (
 	// ISO8601 date format
-	ISO8601 = "2006-01-02T15:04:05-0700"
+	ISO8601 = "2006-01-02T15:04:05.000Z"
 )
 
 // Transaction represents a qonto transaction model
@@ -44,7 +43,7 @@ type Transaction struct {
 	OperationType    string  `json:"operation_type"` // transfert | card | direct_debit | income | qonto_fee
 	Currency         string  `json:"currency"`       // ISO 4217
 	LocalCurrency    string  `json:"local_currency"` // ISO 4217
-	SettleAt         Qtime   `json:"settle_at"`
+	SettleAt         Qtime   `json:"settled_at"`
 	EmittedAt        Qtime   `json:"emitted_at"`
 	Status           string  `json:"status"`
 	Note             string  `json:"note"`
@@ -59,10 +58,7 @@ type Qtime struct {
 
 // UnmarshalJSON is the Qtime unmarshaler
 func (t *Qtime) UnmarshalJSON(b []byte) (err error) {
-	var s string
-	if err := json.Unmarshal(b, &s); err != nil {
-		return err
-	}
+	b = b[1 : len(b)-1]
 	t.Time, err = time.Parse(ISO8601, string(b))
 	return err
 }
